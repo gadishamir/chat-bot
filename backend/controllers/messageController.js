@@ -1,36 +1,64 @@
-const { callGPT } = require("../services/openaiService");
+const conversationService = require("../services/conversationService");
 
-const system = `Be useful and helpful.`;
-
-// Initialize chat history with system message
-let chatHistory = [
-  { role: "system", content: system }
-];
-
+/**
+ * Handle incoming message requests
+ */
 async function handleMessage(req, res) {
-
   try {
-    const content = req.body.message;
-
-    if (content.trim() === "") {
-      console.log('Empty message received');
-      return res.status(400).json({ error: "Empty message" });
-    }
-
-    // Add user message to history
-    chatHistory.push({ role: "user", content: content });
-
-    // Get response from GPT
-    const response = await callGPT(chatHistory);
-
-    // Add assistant response to history
-    chatHistory.push({ role: "assistant", content: response });
-
+    const message = req.body.message;
+    
+    // Let the service handle the message processing
+    const response = await conversationService.processMessage(message);
+    
     return res.json({ message: response });
   } catch (error) {
     console.error('Error in handleMessage:', error);
-    return res.status(500).json({ error: "Internal server error", details: error.message });
+    
+    if (error.message === "Empty message") {
+      return res.status(400).json({ error: "Empty message" });
+    }
+    
+    return res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message 
+    });
   }
 }
 
-module.exports = { handleMessage };
+/**
+ * Get the conversation history
+ */
+function getConversationHistory(req, res) {
+  try {
+    const history = conversationService.getHistory();
+    return res.json({ history });
+  } catch (error) {
+    console.error('Error getting conversation history:', error);
+    return res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message 
+    });
+  }
+}
+
+/**
+ * Reset the conversation
+ */
+function resetConversation(req, res) {
+  try {
+    conversationService.resetConversation();
+    return res.json({ message: "Conversation reset successfully" });
+  } catch (error) {
+    console.error('Error resetting conversation:', error);
+    return res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message 
+    });
+  }
+}
+
+module.exports = { 
+  handleMessage,
+  getConversationHistory,
+  resetConversation
+};
