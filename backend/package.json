@@ -8,12 +8,17 @@
   },
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "test": "jest"
   },
   "name": "chat_bot",
   "version": "1.0.0",
   "description": "Chat Bot Using OpenAI's API backend express server",
   "main": "app.js",
   "author": "Tyler O'Neil",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@faker-js/faker": "^9.7.0",
+    "jest": "^29.7.0"
+  }
 }
