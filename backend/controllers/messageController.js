@@ -1,14 +1,13 @@
+// controllers/messageController.js
+
 const { callGPT } = require("../services/openaiService");
-
-const system = `Be useful and helpful.`;
-
-// Initialize chat history with system message
-let chatHistory = [
-  { role: "system", content: system }
-];
+const {
+  getHistory,
+  addUserMessage,
+  addAssistantMessage
+} = require("../services/chatHistoryService");
 
 async function handleMessage(req, res) {
-
   try {
     const content = req.body.message;
 
@@ -17,14 +16,12 @@ async function handleMessage(req, res) {
       return res.status(400).json({ error: "Empty message" });
     }
 
-    // Add user message to history
-    chatHistory.push({ role: "user", content: content });
+    // שימוש בסרוויס
+    addUserMessage(content);
 
-    // Get response from GPT
-    const response = await callGPT(chatHistory);
+    const response = await callGPT(getHistory());
 
-    // Add assistant response to history
-    chatHistory.push({ role: "assistant", content: response });
+    addAssistantMessage(response);
 
     return res.json({ message: response });
   } catch (error) {
